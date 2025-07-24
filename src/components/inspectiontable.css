@@ -1,0 +1,67 @@
+.inspection-layout {
+  display: flex;
+  gap: 40px;
+  padding: 20px;
+  color: #d0d2d6;
+  background-color: transparent;
+}
+
+.image-side {
+  flex: 1;
+}
+
+.table-side {
+  flex: 2;
+}
+
+.image-missing {
+  margin-top: 20px;
+  text-align: center;
+  color: gray;
+  font-size: 14px;
+}
+
+.image-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.inspection-table {
+  width: 100%;
+  font-size: 12px;
+  border-collapse: collapse;
+  background: none;
+  color: #d0d2d6;
+}
+    
+
+.inspection-table th,
+.inspection-table td {
+  padding: 6px 10px;
+  text-align: center;
+}
+
+.inspection-table th {
+  font-weight: 500;
+  color: #ccc;
+}
+.inspection-table th {
+  font-weight: 500;
+  /* color: #000; */
+  background-color: #312E2E; /* light grey */
+  font-size: 12px;
+}
+.image-side p {
+  font-size: 14px; /* or any size you prefer */
+  color: #bec0c4; /* optional: for better contrast on dark theme */
+  margin-top: 4px;
+}
+.table-side p {
+  font-size: 14px; /* or any size you prefer */
+  color: #bec0c4; /* optional: for better contrast on dark theme */
+  margin-top: 4px;
+
+} 
+.inspection-table tr {
+  border-bottom: 1px solid #545A6A;  /* Light gray line between rows */
+}

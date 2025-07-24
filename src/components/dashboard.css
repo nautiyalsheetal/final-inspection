@@ -1,0 +1,68 @@
+/* This wraps dashboard content, not navbar */
+.dashboard-body {
+  padding: 20px;
+  background-color: #000; /* black background below navbar */
+  min-height: 100vh;
+}
+
+/* Dropdown section */
+.selector-row {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  align-items: flex-end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 180px;
+}
+
+.label-white {
+  color: white;
+  margin-bottom: 4px;
+}
+
+
+
+.generate-btn {
+  padding: 6px 14px;
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.generate-btn:hover {
+  background-color: #218838;
+}
+
+.invisible {
+  visibility: hidden;
+}
+.normal-dropdown {
+  width: 200px;
+  max-height: 30px; /* keeps input height small */
+}
+
+/* .normal-dropdown option {
+  overflow-y: auto;
+} */
+.scroll-dropdown {
+  max-height: 50px;
+  /* overflow-y: auto; */
+}
+
+.dropdown2 {
+   min-width: 180px;
+  font-size: 14px;
+  color: white;
+  padding: 6px 10px;
+  background-color: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+}

@@ -1,0 +1,93 @@
+/* src/components/navbar.css */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #111;
+  padding: 10px 20px;
+  color: white;
+  position: relative;
+}
+
+.navbar-left {
+  flex: 1;
+}
+
+.navbar-logo {
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.navbar-logo:hover .gear-icon {
+  animation: spin 1s linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.logo-image {
+  height: 40px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+.navbar-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.profile-icon {
+  position: relative;
+  cursor: pointer;
+}
+
+
+.dropdown {
+  position: absolute;
+  top: 40px; /* Push below the icon */
+  right: 0;
+  background-color: #222;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 8px 0;
+  z-index: 100;
+  min-width: 100px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.dropdown button {
+  background: none;
+  border: none;
+  color: white;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown button:hover {
+  background-color: #333;
+}
+.gear-icon {
+  font-size: 18px; /* Change size here */
+  margin: 0 5px;
+}
