@@ -48,20 +48,20 @@
 .inspection-table th {
   font-weight: 500;
   /* color: #000; */
-  background-color: #312E2E; /* light grey */
+  background-color: #312E2E; 
   font-size: 12px;
 }
 .image-side p {
-  font-size: 14px; /* or any size you prefer */
-  color: #bec0c4; /* optional: for better contrast on dark theme */
+  font-size: 14px; 
+  color: #bec0c4;
   margin-top: 4px;
 }
 .table-side p {
-  font-size: 14px; /* or any size you prefer */
-  color: #bec0c4; /* optional: for better contrast on dark theme */
+  font-size: 14px; 
+  color: #bec0c4; 
   margin-top: 4px;
 
 } 
 .inspection-table tr {
-  border-bottom: 1px solid #545A6A;  /* Light gray line between rows */
+  border-bottom: 1px solid #545A6A; 
 }

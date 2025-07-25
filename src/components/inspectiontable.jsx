@@ -33,7 +33,13 @@ const InspectionTable = () => {
         <p >The inspection elements registered on the control parameters within the operation are populated
              here for the Quality Inspector. Upon successful entry of these inspection parameters,
              a Process Chart chart is generated which helps us understand whether the process is within control.</p>
-        <table className="inspection-table">
+
+
+  <p style={{ color: '#ff6666', fontWeight: 'bold' }}>
+    There is no inspection data available.
+  </p>
+
+        {/* <table className="inspection-table">
           <thead>
             <tr>
               <th>SR. NO.</th>
@@ -48,7 +54,7 @@ const InspectionTable = () => {
             </tr>
           </thead>
           <tbody>{tableRows}</tbody>
-        </table>
+        </table> */}
       </div>
     </div>
   );
