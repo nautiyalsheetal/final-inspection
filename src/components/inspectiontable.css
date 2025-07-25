@@ -65,3 +65,14 @@
 .inspection-table tr {
   border-bottom: 1px solid #545A6A; 
 }
+
+
+
+
+.table-buttons-right {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+

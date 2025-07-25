@@ -8,19 +8,15 @@ const Dashboard = () => {
   const [plants, setPlants] = useState([]);
   const [parts, setParts] = useState([]);
   const [operators, setOperators] = useState([]);
-
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [selectedPart, setSelectedPart] = useState(null);
   const [selectedOperator, setSelectedOperator] = useState(null);
-  const [showTable, setShowTable] = useState(false);
-
   const [clientId, setClientId] = useState(null);
   const [token, setToken] = useState(null);
+  const [showTable, setShowTable] = useState(false);
+  const [inspectionData, setInspectionData] = useState([]);
   const [loadingParts, setLoadingParts] = useState(false);
-  // const [loadingOperators, setLoadingOperators] = useState(false);
 
-
-  // Load login info and fetch plants
   useEffect(() => {
     const storedUserData = localStorage.getItem("userLoginData");
 
@@ -49,6 +45,16 @@ const Dashboard = () => {
           value: p.id,
         }));
         setPlants(plantOptions);
+
+        // Auto-select first plant
+        if (plantOptions.length > 0) {
+          const firstPlant = plantOptions[0];
+          setSelectedPlant(firstPlant);
+          await Promise.all([
+            fetchPartsByPlant(clientId, token, firstPlant.value),
+            fetchOperatorsByPlant(clientId, token, firstPlant.value),
+          ]);
+        }
       };
 
       fetchPlants();
@@ -58,7 +64,6 @@ const Dashboard = () => {
     }
   }, []);
 
-  // 🔹 Fetch parts based on plant
   const fetchPartsByPlant = async (clientId, token, plantId) => {
     setLoadingParts(true);
     const response = await fetch(`https://pel.quadworld.in/parts?clientId=${clientId}&plantId=${plantId}`, {
@@ -73,9 +78,6 @@ const Dashboard = () => {
     setLoadingParts(false);
   };
 
-
-
-  // 🔹 Fetch operators based on plant
   const fetchOperatorsByPlant = async (clientId, token, plantId) => {
     const response = await fetch(`https://opms.quadworld.in/operator/all/operator-panel?clientId=${clientId}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -88,7 +90,6 @@ const Dashboard = () => {
     setOperators(operatorOptions);
   };
 
-  // 🔹 When plant is selected
   const handlePlantChange = async (selected) => {
     setSelectedPlant(selected);
     setSelectedPart(null);
@@ -102,15 +103,39 @@ const Dashboard = () => {
     }
   };
 
+const handleGenerate = async () => {
+  if (!clientId || !token || !selectedPlant || !selectedPart) return;
 
+  try {
+    const response = await fetch(
+      `https://pel.quadworld.in/parts?clientId=${clientId}&plantId=${selectedPlant.value}&id=${selectedPart.value}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await response.json();
+    const result = Array.isArray(data) ? data : data.result || [];
+
+    console.log("Full Part Response:", result); // 🧪 Check this in console
+
+    if (result.length > 0) {
+      const inspections = result[0].finalInspections || [];
+      setInspectionData(inspections);
+    } else {
+      setInspectionData([]);
+    }
+
+    setShowTable(true);
+  } catch (error) {
+    console.error("Error fetching part data:", error);
+  }
+};
 
   const handleLogout = () => {
     localStorage.removeItem("userLoginData");
     window.location.href = '/';
-  };
-
-  const handleGenerate = () => {
-    setShowTable(true);
   };
 
   return (
@@ -144,10 +169,7 @@ const Dashboard = () => {
               isSearchable
               placeholder={!selectedPlant ? "Select Plant First" : "Search or Select Part"}
               isDisabled={!selectedPlant}
-
             />
-
-
           </div>
 
           <div className="form-group col-md-3">
@@ -169,13 +191,15 @@ const Dashboard = () => {
             <button onClick={handleGenerate}>Generate</button>
           </div>
         </div>
-        {showTable && <Inspectiontable />}
+
+        {showTable && <Inspectiontable data={inspectionData} />}
       </div>
     </>
   );
 };
 
 export default Dashboard;
+
 
 
 
