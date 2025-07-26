@@ -16,6 +16,8 @@ const Dashboard = () => {
   const [showTable, setShowTable] = useState(false);
   const [inspectionData, setInspectionData] = useState([]);
   const [loadingParts, setLoadingParts] = useState(false);
+  const [shifts, setShifts] = useState([]);
+  const [shiftName, setShiftName] = useState('');
 
   useEffect(() => {
     const storedUserData = localStorage.getItem("userLoginData");
@@ -34,7 +36,6 @@ const Dashboard = () => {
       setClientId(clientId);
       setToken(token);
 
-      // Fetch all plants
       const fetchPlants = async () => {
         const response = await fetch(`https://pel.quadworld.in/operator-panel/plants?clientId=${clientId}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -46,13 +47,13 @@ const Dashboard = () => {
         }));
         setPlants(plantOptions);
 
-        // Auto-select first plant
         if (plantOptions.length > 0) {
           const firstPlant = plantOptions[0];
           setSelectedPlant(firstPlant);
           await Promise.all([
             fetchPartsByPlant(clientId, token, firstPlant.value),
             fetchOperatorsByPlant(clientId, token, firstPlant.value),
+            fetchShiftsByPlant(clientId, token, firstPlant.value),
           ]);
         }
       };
@@ -90,6 +91,23 @@ const Dashboard = () => {
     setOperators(operatorOptions);
   };
 
+  const fetchShiftsByPlant = async (clientId, token, plantId) => {
+    try {
+      const response = await fetch(
+        `https://pel.quadworld.in/shifts/getIntervals?clientId=${clientId}&plantId=${plantId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await response.json();
+      const shiftData = Array.isArray(data) ? data : data.result || [];
+      setShifts(shiftData);
+      console.log("Shift Data:", shiftData);
+    } catch (error) {
+      console.error("Failed to fetch shift intervals:", error);
+    }
+  };
+
   const handlePlantChange = async (selected) => {
     setSelectedPlant(selected);
     setSelectedPart(null);
@@ -99,39 +117,41 @@ const Dashboard = () => {
       await Promise.all([
         fetchPartsByPlant(clientId, token, selected.value),
         fetchOperatorsByPlant(clientId, token, selected.value),
+        fetchShiftsByPlant(clientId, token, selected.value),
       ]);
     }
   };
 
-const handleGenerate = async () => {
-  if (!clientId || !token || !selectedPlant || !selectedPart) return;
+  const handleGenerate = async () => {
+    if (!clientId || !token || !selectedPlant?.value || !selectedPart?.value) return;
 
-  try {
-    const response = await fetch(
-      `https://pel.quadworld.in/parts?clientId=${clientId}&plantId=${selectedPlant.value}&id=${selectedPart.value}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    try {
+      const response = await fetch(
+        `https://pel.quadworld.in/parts?clientId=${clientId}&plantId=${selectedPlant.value}&id=${selectedPart.value}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = await response.json();
+      const result = Array.isArray(data) ? data : data.result || [];
+
+      console.log("Full Part Response:", result);
+
+      if (result.length > 0) {
+        const inspections = result[0].finalInspections || [];
+        setInspectionData(inspections);
+        setShowTable(true);
+      } else {
+        setInspectionData([]);
+        setShowTable(false);
       }
-    );
-    const data = await response.json();
-    const result = Array.isArray(data) ? data : data.result || [];
-
-    console.log("Full Part Response:", result); // 🧪 Check this in console
-
-    if (result.length > 0) {
-      const inspections = result[0].finalInspections || [];
-      setInspectionData(inspections);
-    } else {
+    } catch (error) {
+      console.error("Error fetching part data:", error);
       setInspectionData([]);
+      setShowTable(false);
     }
-
-    setShowTable(true);
-  } catch (error) {
-    console.error("Error fetching part data:", error);
-  }
-};
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("userLoginData");
@@ -192,13 +212,25 @@ const handleGenerate = async () => {
           </div>
         </div>
 
-        {showTable && <Inspectiontable data={inspectionData} />}
+        {showTable && (
+          <Inspectiontable
+            data={inspectionData}
+            clientId={clientId}
+            plantId={selectedPlant?.value}
+            partId={selectedPart?.value}
+            operatorId={selectedOperator?.value || ""}
+            shift="A"
+            token={token}
+         
+          />
+        )}
       </div>
     </>
   );
 };
 
 export default Dashboard;
+
 
 
 

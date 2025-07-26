@@ -33,9 +33,14 @@ function Login() {
         throw new Error(errorRes.message || 'Login failed.');
       }
 
-      const result = await response.json();
-      localStorage.setItem('userLoginData', JSON.stringify(result));
-      navigate('/dashboard');
+    const result = await response.json();
+localStorage.setItem('userLoginData', JSON.stringify(result));
+if (result.token) {
+  localStorage.setItem('token', result.token);
+}
+
+navigate('/dashboard');
+    
     } catch (err) {
       setMessage('Login failed: ' + err.message);
       setMessageType('error');

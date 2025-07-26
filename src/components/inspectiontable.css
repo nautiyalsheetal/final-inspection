@@ -1,7 +1,7 @@
 .inspection-layout {
   display: flex;
   gap: 40px;
-  padding: 20px;
+      padding: 3px 2px;
   color: #d0d2d6;
   background-color: transparent;
 }
@@ -32,6 +32,7 @@
   border-collapse: collapse;
   background: none;
   color: #d0d2d6;
+  margin-bottom: 6px;
 }
     
 
@@ -68,11 +69,19 @@
 
 
 
+.table-side {
+  position: relative;
+  padding-bottom: 80px; /* Space for buttons to not overlap content */
+}
 
 .table-buttons-right {
   display: flex;
   justify-content: flex-end;
   gap: 15px;
-  margin-top: 20px;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
 }
+
+
 
