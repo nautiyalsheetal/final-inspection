@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import './inspectiontable.css';
+import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 const InspectionTable = ({
-  data,
+  data = [],
   clientId,
   plantId,
   partId,
   operatorId,
   shift,
-  
-  
 }) => {
   const [values, setValues] = useState({});
 
@@ -21,32 +20,63 @@ const InspectionTable = ({
         ...(prev[index] || {}),
         [field]: value,
         inspectionId: data[index]?.id,
-      }
+      },
     }));
   };
 
   const getISTDateTime = () => {
     const now = moment().utcOffset('+05:30');
     return {
-      date: now.format("YYYY-MM-DD"),
-      dateTime: now.format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+      date: now.format('YYYY-MM-DD'),
+      dateTime: now.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
     };
   };
+const isAllOk = () => {
+  const filledEntries = Object.entries(values);
+
+  // If nothing is filled, consider it valid
+  if (filledEntries.length === 0) return true;
+
+  return data.every((item, index) => {
+    const entry = values[index];
+    if (!entry) return true; // not filled, consider valid
+
+    const lh = entry.lh;
+    const rh = entry.rh;
+
+    if (item.type === 'boolean') {
+      // if one of them is false, return false
+      if (lh === false || rh === false) return false;
+      return true; // true or undefined is okay
+    } else {
+      const lhNum = parseFloat(lh);
+      const rhNum = parseFloat(rh);
+      const min = parseFloat(item.minThreshold);
+      const max = parseFloat(item.maxThreshold);
+
+      // if value filled but invalid, return false
+      if (!isNaN(lhNum) && (lhNum < min || lhNum > max)) return false;
+      if (!isNaN(rhNum) && (rhNum < min || rhNum > max)) return false;
+
+      return true;
+    }
+  });
+};
+
+
+
 
   const handleSubmit = async (status) => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Unauthorized: No token found.');
-      return;
-    }
+    if (!token) return alert('Unauthorized: No token found.');
 
     const { date, dateTime } = getISTDateTime();
-    const inspections = Object.entries(values).map(([_, entry]) => ({
-  inspectionId: entry?.inspectionId || '',
-  lhValue: entry?.lh || '',
-  rhValue: entry?.rh || '',
-}));
 
+    const inspections = Object.values(values).map(entry => ({
+      inspectionId: entry.inspectionId || '',
+      lhValue: entry.lh ?? '',
+      rhValue: entry.rh ?? '',
+    }));
 
     const payload = {
       clientId,
@@ -60,8 +90,6 @@ const InspectionTable = ({
       productionStatus: status === 'Ok',
     };
 
-    console.log('Submitting payload:', payload);
-
     try {
       const res = await fetch('https://pel.quadworld.in/final-inspection-logs', {
         method: 'POST',
@@ -73,24 +101,38 @@ const InspectionTable = ({
       });
 
       const result = await res.json();
-      console.log('API Response:', result);
-
-      if (res.status === 401) {
-        alert('Unauthorized: Please check your token.');
-      } else {
-        alert('Submission successful!');
-      }
+      res.status === 401
+        ? alert('Unauthorized: Invalid token.')
+        : alert('Submission successful!');
     } catch (error) {
-      console.error('Submission failed:', error);
+      console.error('Error submitting:', error);
       alert('Submission failed');
     }
+  };
+
+  const getValidationIcon = (val, min, max) => {
+    if (val === '' || isNaN(val)) return null;
+    const num = parseFloat(val);
+    return num >= min && num <= max ? (
+      <FaCheckCircle color="limegreen" />
+    ) : (
+      <FaTimesCircle color="red" />
+    );
+  };
+
+  const getBooleanIcon = (val) => {
+    if (val === true) return <FaCheckCircle color="limegreen" />;
+    if (val === false) return <FaTimesCircle color="red" />;
+    return null;
   };
 
   return (
     <div className="inspection-layout">
       <div className="image-side">
         <h3>Operation Drawing</h3>
-        <p>You can upload the operation drawing which shall assist the quality inspector.</p>
+        <p>
+          The operation drawing is uploaded from the operation master on your Quad Platform.
+        </p>
         <div className="image-missing">
           <div className="image-icon">🚫</div>
           <div>IMAGE NO LONGER AVAILABLE</div>
@@ -99,7 +141,12 @@ const InspectionTable = ({
 
       <div className="table-side">
         <h3>Inspection Table</h3>
-        {!data || data.length === 0 ? (
+        <p>
+          Inspection elements registered on control parameters are shown here. Fill the values
+          to generate the Process Chart.
+        </p>
+
+        {data.length === 0 ? (
           <p style={{ color: 'red', fontWeight: 'bold' }}>
             🚫 No inspection data found for this part.
           </p>
@@ -120,11 +167,13 @@ const InspectionTable = ({
               <tbody>
                 {data.map((item, index) => (
                   <tr key={index}>
-                     <td>{index + 1}</td>
+                    <td>{index + 1}</td>
                     <td>{item.name}</td>
                     <td>{item.instrument}</td>
                     <td>{item.minThreshold ?? 'N/A'}</td>
                     <td>{item.maxThreshold ?? 'N/A'}</td>
+
+                    {/* LH Input */}
                     <td>
                       {item.type === 'boolean' ? (
                         <>
@@ -146,14 +195,31 @@ const InspectionTable = ({
                           </label>
                         </>
                       ) : (
-                        <input
-                          type="text"
-                          placeholder="LH"
-                          style={{ width: '70px' }}
-                          onChange={(e) => handleInputChange(index, 'lh', e.target.value)}
-                        />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <input
+                            type="text"
+                            placeholder="LH"
+                            style={{ width: '70px' }}
+                            onChange={(e) => handleInputChange(index, 'lh', e.target.value)}
+                          />
+                          {(() => {
+                            const val = parseFloat(values[index]?.lh);
+                            const min = parseFloat(item.minThreshold);
+                            const max = parseFloat(item.maxThreshold);
+                            if (!isNaN(val) && !isNaN(min) && !isNaN(max)) {
+                              return val >= min && val <= max ? (
+                                <FaCheckCircle color="limegreen" />
+                              ) : (
+                                <FaTimesCircle color="red" />
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
                       )}
                     </td>
+
+                    {/* RH Input */}
                     <td>
                       {item.type === 'boolean' ? (
                         <>
@@ -175,12 +241,27 @@ const InspectionTable = ({
                           </label>
                         </>
                       ) : (
-                        <input
-                          type="text"
-                          placeholder="RH"
-                          style={{ width: '70px' }}
-                          onChange={(e) => handleInputChange(index, 'rh', e.target.value)}
-                        />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <input
+                            type="text"
+                            placeholder="RH"
+                            style={{ width: '70px' }}
+                            onChange={(e) => handleInputChange(index, 'rh', e.target.value)}
+                          />
+                          {(() => {
+                            const val = parseFloat(values[index]?.rh);
+                            const min = parseFloat(item.minThreshold);
+                            const max = parseFloat(item.maxThreshold);
+                            if (!isNaN(val) && !isNaN(min) && !isNaN(max)) {
+                              return val >= min && val <= max ? (
+                                <FaCheckCircle color="limegreen" />
+                              ) : (
+                                <FaTimesCircle color="red" />
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -188,14 +269,28 @@ const InspectionTable = ({
               </tbody>
             </table>
 
-            <div className="table-buttons-right">
-              <button className="btn btn-danger" onClick={() => handleSubmit('Not Ok')}>
-                Submit Not Ok
-              </button>
-              <button className="btn btn-success" onClick={() => handleSubmit('Ok')}>
-                Submit Ok
-              </button>
-            </div>
+<div className="table-buttons-right">
+ <button
+  className="btn btn-danger"
+  onClick={() => handleSubmit('Not Ok')}
+  disabled={isAllOk()}
+  style={isAllOk() ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+>
+  Submit Not Ok
+</button>
+
+<button
+  className="btn btn-success"
+  onClick={() => handleSubmit('Ok')}
+  disabled={!isAllOk()}
+  style={!isAllOk() ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+>
+  Submit Ok
+</button>
+
+</div>
+
+
           </>
         )}
       </div>
@@ -204,6 +299,7 @@ const InspectionTable = ({
 };
 
 export default InspectionTable;
+
 
 
 

@@ -17,12 +17,12 @@ const Dashboard = () => {
   const [inspectionData, setInspectionData] = useState([]);
   const [loadingParts, setLoadingParts] = useState(false);
   const [shifts, setShifts] = useState([]);
-  const [shiftName, setShiftName] = useState('');
+
 
   useEffect(() => {
     const storedUserData = localStorage.getItem("userLoginData");
 
-    try {
+    try {  
       const parsedUser = JSON.parse(storedUserData);
       const clientId = parsedUser?.clientId;
       const token = parsedUser?.token;

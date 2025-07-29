@@ -1,7 +1,7 @@
 .inspection-layout {
   display: flex;
   gap: 40px;
-      padding: 3px 2px;
+  padding: 20px;
   color: #d0d2d6;
   background-color: transparent;
 }
@@ -32,7 +32,6 @@
   border-collapse: collapse;
   background: none;
   color: #d0d2d6;
-  margin-bottom: 6px;
 }
     
 
@@ -65,6 +64,7 @@
 } 
 .inspection-table tr {
   border-bottom: 1px solid #545A6A; 
+  width: 25px;
 }
 
 
@@ -85,3 +85,28 @@
 
 
 
+.input-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.boolean-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-buttons-right {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #555 !important; /* darker grey for dark theme */
+  color: #ccc !important;
+  border-color: #444 !important;
+}
